@@ -683,6 +683,17 @@ class RaceProgressBarComponent(BaseComponent):
                     self.COLORS["text"], 8,
                     anchor_x="center", anchor_y="top"
                 ).draw()
+    def on_mouse_press(self, window, x: float, y: float, button: int, modifiers: int) -> bool:
+        """Handle mouse click to seek to position."""
+        if (self._bar_left <= x <= self._bar_left + self._bar_width and
+            self.bottom - 5 <= y <= self.bottom + self.height + 5):
+            
+            # Seek to clicked position
+            target_frame = self._x_to_frame(x)
+            if hasattr(window, 'frame_index'):
+                window.frame_index = float(max(0, min(target_frame, self._total_frames - 1)))
+            return True
+        return False
 # Build track geometry from example lap telemetry
 
 def build_track_from_example_lap(example_lap, track_width=200):
