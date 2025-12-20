@@ -1292,7 +1292,6 @@ def extract_race_events(frames: List[dict], track_statuses: List[dict], total_la
 
 
 # Build track geometry from example lap telemetry
-
 def build_track_from_example_lap(example_lap, track_width=200):
     drs_zones = plotDRSzones(example_lap)
     plot_x_ref = example_lap["X"]
@@ -1330,7 +1329,7 @@ def plotDRSzones(example_lap):
    y_val = example_lap["Y"]
    drs_zones = []
    drs_start = None
-   
+
    for i, val in enumerate(example_lap["DRS"]):
        if val in [10, 12, 14]:
            if drs_start is None:
@@ -1355,3 +1354,40 @@ def plotDRSzones(example_lap):
        drs_zones.append(zone)
    
    return drs_zones
+
+def draw_finish_line(self):
+    if(len(self.screen_inner_points) > 0 and len(self.screen_outer_points) > 0):
+        start_inner = self.screen_inner_points[0]
+        start_outer = self.screen_outer_points[0]
+
+        num_squares = 20
+        extension = 20
+            
+        # Calculate direction vector and normalize
+        dx = start_outer[0] - start_inner[0]
+        dy = start_outer[1] - start_inner[1]
+        length = np.sqrt(dx**2 + dy**2)
+            
+        if length > 0:
+            # Normalize direction (unit vector)
+            dx_norm = dx / length
+            dy_norm = dy / length
+                
+            # Extend line beyond track limits
+            extended_inner = (start_inner[0] - extension * dx_norm, 
+                             start_inner[1] - extension * dy_norm)
+            extended_outer = (start_outer[0] + extension * dx_norm, 
+                             start_outer[1] + extension * dy_norm)
+            
+            # Draw checkered pattern across extended line
+            for i in range(num_squares):
+                t1 = i / num_squares # start of segment
+                t2 = (i + 1) / num_squares # end of segment
+                
+                x1 = extended_inner[0] + t1 * (extended_outer[0] - extended_inner[0])
+                y1 = extended_inner[1] + t1 * (extended_outer[1] - extended_inner[1])
+                x2 = extended_inner[0] + t2 * (extended_outer[0] - extended_inner[0])
+                y2 = extended_inner[1] + t2 * (extended_outer[1] - extended_inner[1])
+                
+                color = arcade.color.WHITE if i % 2 == 0 else arcade.color.BLACK
+                arcade.draw_line(x1, y1, x2, y2, color, 6)
